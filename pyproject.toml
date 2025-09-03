@@ -28,6 +28,7 @@ dependencies = [
   "python-telegram-bot",    # Core library for the Telegram Bot API
   "google-generativeai",    # For integration with the Gemini AI API
   "python-dotenv",          # For loading secrets (tokens) from a .env file
+  "google-ai-generativelanguage"
 ]
 
 [project.urls]
