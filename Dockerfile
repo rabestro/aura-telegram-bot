@@ -1,5 +1,5 @@
 # Stage 1: Use an official lightweight Python image
-FROM python:3.13-slim as python-base
+FROM python:3.13-slim AS python-base
 
 # Set environment variables to prevent writing .pyc files and to run in unbuffered mode
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -18,7 +18,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv pip sync --system pyproject.toml
 
 # Stage 2: Create the final, clean image
-FROM python:3.13-slim as final
+FROM python:3.13-slim AS final
 
 WORKDIR /app
 
