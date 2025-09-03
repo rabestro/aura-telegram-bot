@@ -61,7 +61,7 @@ async def get_gemini_answer(question: str, knowledge_base: str) -> str:
     """
 
     try:
-        model = genai.GenerativeModel("gemini-pro")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         response = await model.generate_content_async(prompt)
         return response.text
     except Exception as e:
