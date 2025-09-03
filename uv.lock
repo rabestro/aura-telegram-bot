@@ -34,6 +34,7 @@ name = "aura-telegram-bot"
 source = { editable = "." }
 dependencies = [
     { name = "google-ai-generativelanguage" },
+    { name = "google-api-core" },
     { name = "google-generativeai" },
     { name = "python-dotenv" },
     { name = "python-telegram-bot" },
@@ -51,6 +52,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "google-ai-generativelanguage" },
+    { name = "google-api-core" },
     { name = "google-generativeai" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "poethepoet", marker = "extra == 'dev'" },
