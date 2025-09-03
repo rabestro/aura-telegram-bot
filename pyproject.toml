@@ -25,9 +25,9 @@ classifiers = [
 
 # --- Project Dependencies ---
 dependencies = [
-  "python-telegram-bot", # Core library for the Telegram Bot API
-  "google-generativeai", # For integration with the Gemini AI API
-  "python-dotenv", # For loading secrets (tokens) from a .env file
+  "python-telegram-bot",    # Core library for the Telegram Bot API
+  "google-generativeai",    # For integration with the Gemini AI API
+  "python-dotenv",          # For loading secrets (tokens) from a .env file
 ]
 
 [project.urls]
@@ -40,12 +40,11 @@ Repository = "https://github.com/rabestro/aura-telegram-bot.git"
 # ==============================================================================
 [project.optional-dependencies]
 dev = [
-  "ruff", # Code linter and formatter
-  "mypy", # Static type checker
-  "pytest", # Testing framework
-  "pytest-asyncio", # For testing asynchronous code
-  "poethepoet", # Task runner
-  "types-python-telegram-bot", # Type stubs for the telegram bot library
+  "ruff",                 # Code linter and formatter
+  "mypy",                 # Static type checker
+  "pytest",               # Testing framework
+  "pytest-asyncio",       # For testing asynchronous code
+  "poethepoet",           # Task runner
 ]
 
 # ==============================================================================
@@ -131,7 +130,7 @@ asyncio_mode = "auto" # Configuration for pytest-asyncio
 # ==============================================================================
 [tool.poe.tasks]
 
-_env_check = """
+_env_check.shell = """
 if [ ! -f .env ]; then
     echo "⚠️  Warning: .env file not found. Creating a default one."
     echo "TELEGRAM_TOKEN='YOUR_TELEGRAM_BOT_TOKEN_HERE'" > .env
@@ -168,9 +167,9 @@ help = "🧪 Run tests with pytest"
 
 # --- Bot Execution ---
 [tool.poe.tasks.run]
-sequence = ["_env_check"]
 cmd = "python -m aura_telegram_bot.main"
 help = "▶️  Run the Telegram bot for local development"
+deps = ["_env_check"] # This ensures _env_check runs BEFORE the main command
 
 # --- Aggregate Tasks ---
 [tool.poe.tasks.quality]
