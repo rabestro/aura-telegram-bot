@@ -59,7 +59,7 @@ aura-bot = "aura_telegram_bot.main:main"
 #    Settings for building the package. Uses setuptools with scm for versioning.
 # ==============================================================================
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+requires = ["setuptools>=80.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
