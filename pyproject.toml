@@ -1,0 +1,181 @@
+# ==============================================================================
+# 1. Project Metadata
+#    Core information about the project, used for packaging and publishing.
+# ==============================================================================
+[project]
+name = "aura-telegram-bot"
+dynamic = ["version"]  # Version is managed automatically via git tags by setuptools-scm
+description = "An intelligent Telegram bot for the Aura smart home, providing assistance and information about home devices."
+authors = [
+  { name = "Jegors Čemisovs", email = "jegors.cemisovs@gmail.com" },
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Home Automation",
+]
+
+# --- Project Dependencies ---
+dependencies = [
+  "python-telegram-bot",    # Core library for the Telegram Bot API
+  "google-generativeai",    # For integration with the Gemini AI API
+  "python-dotenv",          # For loading secrets (tokens) from a .env file
+]
+
+[project.urls]
+Homepage = "https://github.com/rabestro/aura-telegram-bot"
+Repository = "https://github.com/rabestro/aura-telegram-bot.git"
+
+# ==============================================================================
+# 2. Development Dependencies
+#    Libraries needed only for development (testing, linting, etc.).
+# ==============================================================================
+[project.optional-dependencies]
+dev = [
+  "ruff",                 # Code linter and formatter
+  "mypy",                 # Static type checker
+  "pytest",               # Testing framework
+  "pytest-asyncio",       # For testing asynchronous code
+  "poethepoet",           # Task runner
+]
+
+# ==============================================================================
+# 3. Entry Points
+#    Defines how to run the application after installation.
+# ==============================================================================
+[project.scripts]
+aura-bot = "aura_telegram_bot.main:main"
+
+# ==============================================================================
+# 4. Build System Configuration
+#    Settings for building the package. Uses setuptools with scm for versioning.
+# ==============================================================================
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]  # Look for packages in the 'src' directory
+
+[tool.setuptools_scm]
+write_to = "src/aura_telegram_bot/_version.py"
+
+# ==============================================================================
+# 5. Tooling Configuration
+#    Settings for all development tools.
+# ==============================================================================
+
+# --- UV (Package Manager) ---
+[tool.uv]
+# UV-specific settings can be added here if needed.
+
+# --- Ruff (Linter and Formatter) ---
+[tool.ruff]
+target-version = "py312"
+line-length = 99
+exclude = ["src/aura_telegram_bot/_version.py"]
+
+[tool.ruff.lint]
+select = [
+  "E", # pycodestyle (errors)
+  "W", # pycodestyle (warnings)
+  "F", # Pyflakes
+  "I", # isort (import sorting)
+  "UP", # pyupgrade (modernize syntax)
+  "B", # flake8-bugbear (bug detection)
+  "S", # flake8-bandit (security checks)
+  "C4", # flake8-comprehensions (idiomatic comprehensions)
+  "D", # pydocstyle (docstring style)
+  "RUF", # Ruff-specific rules
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["aura_telegram_bot", "tests"]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"] # Allow 'assert' in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+# --- MyPy (Type Checker) ---
+[tool.mypy]
+mypy_path = "src"
+strict = true
+
+# --- Pytest (Testing Framework) ---
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
+asyncio_mode = "auto" # Configuration for pytest-asyncio
+
+# ==============================================================================
+# 6. Poe the Poet (Task Runner)
+#    Defines short commands to automate routine development tasks.
+# ==============================================================================
+[tool.poe.tasks]
+
+_env_check.shell = """
+if [ ! -f .env ]; then
+    echo "⚠️  Warning: .env file not found. Creating a default one."
+    echo "TELEGRAM_TOKEN='YOUR_TELEGRAM_BOT_TOKEN_HERE'" > .env
+    echo "GEMINI_API_KEY='YOUR_GEMINI_API_KEY_HERE'" >> .env
+    echo "Please fill in the .env file with your actual tokens."
+fi
+"""
+
+[tool.poe.tasks.install]
+cmd = "uv sync --all-extras"
+help = "📦 Install all project dependencies"
+
+# --- Code Quality ---
+[tool.poe.tasks.format]
+cmd = "ruff format src tests"
+help = "🎨 Format code using Ruff"
+
+[tool.poe.tasks.lint]
+cmd = "ruff check src tests"
+help = "🔍 Lint code for errors using Ruff"
+
+[tool.poe.tasks.fix]
+cmd = "ruff check src tests --fix --show-fixes"
+help = "✨ Automatically fix linter errors"
+
+[tool.poe.tasks.mypy]
+cmd = "mypy src/"
+help = "🧐 Check static types with mypy"
+
+# --- Testing ---
+[tool.poe.tasks.test]
+cmd = "pytest"
+help = "🧪 Run tests with pytest"
+
+# --- Bot Execution ---
+[tool.poe.tasks.run]
+cmd = "python -m aura_telegram_bot.main"
+help = "▶️  Run the Telegram bot for local development"
+deps = ["_env_check"] # This ensures _env_check runs BEFORE the main command
+
+# --- Aggregate Tasks ---
+[tool.poe.tasks.quality]
+sequence = ["lint", "mypy"]
+help = "🏅 Run all code quality checks"
+
+[tool.poe.tasks.check]
+sequence = ["quality", "test"]
+help = "✅ Run all checks (quality + tests)"

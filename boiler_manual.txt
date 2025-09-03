@@ -1,0 +1,22 @@
+Viessmann Vitodens 111-F B1TF-25 - Technical Summary
+
+## Operating Modes
+
+- **Comfort Mode:** The boiler maintains a pre-heated water supply in the integrated tank. This provides instant hot water but consumes slightly more gas to keep the water warm. This mode is indicated by a "C" on the display.
+- **Eco Mode:** The boiler only heats water on demand. There might be a short delay before hot water is available, but this mode is more energy-efficient. This mode is indicated by an "E" on the display.
+- **Changing Modes:** To switch between Comfort and Eco modes, press the "MODE" button on the control panel for 3 seconds.
+
+## Common Fault Codes
+
+- **Fault Code F2:** This indicates a burner lockout due to overheating.
+    - Cause: Often caused by low water pressure in the heating circuit or a blocked pump.
+    - Solution: Check the system pressure gauge. It should be between 1.0 and 1.5 bar. If it's low, you need to top up the system using the filling loop. If the pressure is okay, the issue might be with the pump, and a service engineer should be called.
+
+- **Fault Code F4:** This indicates a flame failure. The burner attempted to light but failed.
+    - Cause: Can be due to an interruption in the gas supply, a faulty ignition electrode, or an issue with the flue system.
+    - Solution: Check if other gas appliances in the house are working. If they are, try resetting the boiler. If the fault persists after 2-3 resets, do not attempt further resets and call a service engineer.
+
+
+## Routine Maintenance
+- **Annual Service:** It is highly recommended to have the boiler serviced annually by a certified Viessmann engineer. This ensures optimal performance and safety. The service includes cleaning the heat exchanger, checking the ignition system, and verifying flue gas emissions.
+- **Pressure Check:** The homeowner should check the system pressure gauge monthly. If the pressure drops below 1.0 bar, it should be re-pressurized to approximately 1.5 bar.

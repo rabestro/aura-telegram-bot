@@ -1,17 +1,34 @@
-# Use an official lightweight Python image
-FROM python:3.9-slim
+# Stage 1: Use an official lightweight Python image
+FROM python:3.13-slim as python-base
+
+# Set environment variables to prevent writing .pyc files and to run in unbuffered mode
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install uv, the package manager
+RUN pip install uv
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the file with dependencies
-COPY requirements.txt .
+# Copy only the dependency configuration files
+COPY pyproject.toml uv.lock ./
 
-# Install the dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install project dependencies into the system Python environment inside the container
+RUN uv pip sync --system
 
-# Copy the bot script into the container
-COPY echo_bot.py .
+# Stage 2: Create the final, clean image
+FROM python:3.13-slim as final
+
+WORKDIR /app
+
+# Copy the installed dependencies from the base stage
+COPY --from=python-base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=python-base /usr/local/bin /usr/local/bin
+
+# Copy the application source code and knowledge base
+COPY src/aura_telegram_bot ./aura_telegram_bot
+COPY boiler_manual.txt .
 
 # Command to run the bot when the container starts
-CMD ["python", "echo_bot.py"]
+CMD ["python", "-m", "aura_telegram_bot.main"]
