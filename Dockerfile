@@ -15,7 +15,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install project dependencies into the system Python environment inside the container
-RUN uv sync
+RUN uv pip compile pyproject.toml -o requirements.txt
+RUN uv pip sync --system requirements.txt
 
 # Stage 2: Create the final, clean image
 FROM python:3.12-slim AS final
