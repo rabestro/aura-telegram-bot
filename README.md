@@ -64,8 +64,7 @@ This repository serves as a template for building your own smart home assistant.
 
 ### Public Knowledge Base
 
-The bot's "public brain" is a simple text file (`knowledge_base.txt`). You can edit this file to provide the bot with any general information you want it to know. This could be anything from your Wi-Fi password for guests to the user manual for your coffee machine. This file is safe to commit to Git.
-
+The bot's "public brain" is a simple text file (`knowledge_base.txt`). Use it only for non-sensitive, public information (e.g., device model notes, general procedures). Do not store passwords, tokens, or private data here. For sensitive information, use the Private Wiki pattern below.
 ### Extending with Integrations
 
 The code is structured to be easily extendable. To add new integrations:
