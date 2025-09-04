@@ -9,7 +9,8 @@ description = "An intelligent Telegram bot for the Aura smart home, providing as
 authors = [
   { name = "Jegors Čemisovs", email = "jegors.cemisovs@gmail.com" },
 ]
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
@@ -25,11 +26,9 @@ classifiers = [
 
 # --- Project Dependencies ---
 dependencies = [
-  "python-telegram-bot",    # Core library for the Telegram Bot API
-  "google-generativeai",    # For integration with the Gemini AI API
-  "python-dotenv",          # For loading secrets (tokens) from a .env file
-  "google-ai-generativelanguage",
-  "google-api-core",
+  "python-telegram-bot", # Core library for the Telegram Bot API
+  "google-generativeai", # For integration with the Gemini AI API
+  "python-dotenv", # For loading secrets (tokens) from a .env file
 ]
 
 [project.urls]
@@ -42,11 +41,11 @@ Repository = "https://github.com/rabestro/aura-telegram-bot.git"
 # ==============================================================================
 [project.optional-dependencies]
 dev = [
-  "ruff",                 # Code linter and formatter
-  "mypy",                 # Static type checker
-  "pytest",               # Testing framework
-  "pytest-asyncio",       # For testing asynchronous code
-  "poethepoet",           # Task runner
+  "ruff", # Code linter and formatter
+  "mypy", # Static type checker
+  "pytest", # Testing framework
+  "pytest-asyncio", # For testing asynchronous code
+  "poethepoet", # Task runner
 ]
 
 # ==============================================================================
