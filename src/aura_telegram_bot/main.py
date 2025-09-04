@@ -31,7 +31,7 @@ def load_knowledge_base() -> str:
         with open(knowledge_base_path, encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        logger.error("boiler_manual.txt not found. The bot will lack specific context.")
+        logger.error("knowledge_base.txt not found. The bot will lack specific context.")
         return "No specific boiler information is available."
 
 
