@@ -27,9 +27,9 @@ This repository serves as a template for building your own smart home assistant.
     
 - Docker
     
-- A Telegram Bot Token from [@BotFather](https://t.me/BotFather "null")
+- A Telegram Bot Token from [@BotFather](https://t.me/BotFather)
     
-- A Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/ "null")
+- A Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/)
     
 
 ### Installation & Setup
