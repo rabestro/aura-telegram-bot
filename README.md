@@ -37,7 +37,7 @@ This repository serves as a template for building your own smart home assistant.
 1. **Clone the repository:**
     
     ```
-    git clone [https://github.com/your-username/aura-telegram-bot.git](https://github.com/your-username/aura-telegram-bot.git)
+    git clone https://github.com/rabestro/aura-telegram-bot.git
     cd aura-telegram-bot
     ```
     
