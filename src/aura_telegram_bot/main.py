@@ -27,11 +27,11 @@ def load_knowledge_base() -> str:
     """
     try:
         # Assumes the file is in the project root (and container WORKDIR)
-        knowledge_base_path = Path("boiler_manual.txt")
+        knowledge_base_path = Path("knowledge_base.txt")
         with open(knowledge_base_path, encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        logger.error("boiler_manual.txt not found. The bot will lack specific context.")
+        logger.error("knowledge_base.txt not found. The bot will lack specific context.")
         return "No specific boiler information is available."
 
 
