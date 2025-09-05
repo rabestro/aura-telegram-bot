@@ -21,7 +21,7 @@ async def main() -> None:
     """Runs the main CLI loop."""
     load_dotenv()
     gemini_api_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_api_key:
+    if gemini_api_key is None:
         msg = "GEMINI_API_KEY environment variable not set. Please create a .env file."
         raise ValueError(msg)
 
