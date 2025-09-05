@@ -14,8 +14,8 @@ from aura_telegram_bot.core.engine import AuraEngine
 
 # --- Setup logging ---
 logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
@@ -37,11 +37,16 @@ def load_knowledge_base() -> str:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a welcome message when the /start command is issued."""
-    user_name = update.effective_user.first_name
-    await update.message.reply_text(
+    user_name = (
+        update.effective_user.first_name
+        if update.effective_user and update.effective_user.first_name
+        else "there"
+    )
+    if update.message is not None:
+        await update.message.reply_text(
             f"Hello, {user_name}! I am the Aura expert for our Viessmann boiler. "
             "Ask me a question about it.",
-    )
+        )
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -51,15 +56,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     user_question = update.message.text
     logger.info(
-        f"Received question from user '{update.effective_user.first_name}': {user_question}")
+        f"Received question from user '"
+        f"{
+            (
+                update.effective_user.first_name
+                if update.effective_user and update.effective_user.first_name
+                else 'unknown'
+            )
+        }': {user_question}",
+    )
 
     # Show "typing..." status in Telegram for better UX
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    if update.effective_chat is not None:
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
 
     # The engine is stored in the bot's context, so we can access it here.
     engine: AuraEngine = context.bot_data["engine"]
     answer = await engine.get_response(user_question)
-    await update.message.reply_text(answer)
+    if update.message is not None:
+        await update.message.reply_text(answer)
 
 
 def main() -> None:
