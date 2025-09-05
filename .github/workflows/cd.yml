@@ -29,9 +29,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Step 3: Build the Docker image and push it to the registry
-      # This action builds from our Dockerfile and tags the image as 'latest'.
-      # I'm assuming your Docker Hub username is 'rabestro'. If not, change it here.
+      # Step 3: Set up QEMU for multi-platform builds
+      # This allows our amd64 runner to emulate ARM architectures.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Step 4: Set up Docker Buildx
+      # This is a Docker CLI plugin that enables multi-platform builds.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -44,10 +48,14 @@ jobs:
             type=raw,value=latest
             type=sha,format=short
 
+      # Step 5: Build and push multi-platform Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          # We now specify all the architectures we want to build for.
+          # This will make the image compatible with standard PCs, new RPi's, and older RPi's.
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
