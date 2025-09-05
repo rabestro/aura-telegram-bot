@@ -53,9 +53,9 @@ jobs:
       # Step 6: Run all code quality checks (linter, type checker)
       # We reuse our `poe` task for consistency with local development.
       - name: Run code quality checks
-        run: poe quality
+        run: uv run poe quality
 
       # Step 7: Run the unit test suite
       # We reuse our `poe` task to run pytest.
       - name: Run tests
-        run: poe test
+        run: uv run poe test
