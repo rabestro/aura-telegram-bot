@@ -1,3 +1,5 @@
+"""The main engine of the Aura bot, containing the core business logic."""
+
 from __future__ import annotations
 
 import logging
@@ -66,8 +68,7 @@ class AuraEngine:
             )
 
     async def get_response(self, user_input: str) -> str:
-        """
-        Processes the user's input and returns a response.
+        """Processes the user's input and returns a response.
 
         This is the main public entry point for the engine.
 

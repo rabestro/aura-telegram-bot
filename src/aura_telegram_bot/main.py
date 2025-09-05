@@ -14,8 +14,8 @@ from aura_telegram_bot.core.engine import AuraEngine
 
 # --- Setup logging ---
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
@@ -39,8 +39,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a welcome message when the /start command is issued."""
     user_name = update.effective_user.first_name
     await update.message.reply_text(
-        f"Hello, {user_name}! I am the Aura expert for our Viessmann boiler. "
-        "Ask me a question about it.",
+            f"Hello, {user_name}! I am the Aura expert for our Viessmann boiler. "
+            "Ask me a question about it.",
     )
 
 
@@ -50,7 +50,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     user_question = update.message.text
-    logger.info(f"Received question from user '{update.effective_user.first_name}': {user_question}")
+    logger.info(
+        f"Received question from user '{update.effective_user.first_name}': {user_question}")
 
     # Show "typing..." status in Telegram for better UX
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
