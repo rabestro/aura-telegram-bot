@@ -121,3 +121,71 @@ strict = true
 [[tool.mypy.overrides]]
 module = "google.generativeai.*"
 ignore_missing_imports = true
+
+# --- Pytest (Testing Framework) ---
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-ra -q --strict-markers"
+asyncio_mode = "auto" # Configuration for pytest-asyncio
+
+# ==============================================================================
+# 6. Poe the Poet (Task Runner)
+#    Defines short commands to automate routine development tasks.
+# ==============================================================================
+[tool.poe.tasks]
+
+_env_check.shell = """
+if [ ! -f .env ]; then
+    echo "⚠️  Warning: .env file not found. Creating a default one."
+    echo "TELEGRAM_TOKEN='YOUR_TELEGRAM_BOT_TOKEN_HERE'" > .env
+    echo "GEMINI_API_KEY='YOUR_GEMINI_API_KEY_HERE'" >> .env
+    echo "Please fill in the .env file with your actual tokens."
+fi
+"""
+
+[tool.poe.tasks.install]
+cmd = "uv sync --all-extras"
+help = "📦 Install all project dependencies"
+
+# --- Code Quality ---
+[tool.poe.tasks.format]
+cmd = "ruff format src tests"
+help = "🎨 Format code using Ruff"
+
+[tool.poe.tasks.lint]
+cmd = "ruff check src tests"
+help = "🔍 Lint code for errors using Ruff"
+
+[tool.poe.tasks.fix]
+cmd = "ruff check src tests --fix --show-fixes"
+help = "✨ Automatically fix linter errors"
+
+[tool.poe.tasks.mypy]
+cmd = "mypy src/"
+help = "🧐 Check static types with mypy"
+
+# --- Testing ---
+[tool.poe.tasks.test]
+cmd = "pytest"
+help = "🧪 Run tests with pytest"
+
+# --- Bot Execution ---
+[tool.poe.tasks.run]
+cmd = "python -m aura_telegram_bot.main"
+help = "▶️  Run the Telegram bot for local development"
+deps = ["_env_check"] # This ensures _env_check runs BEFORE the main command
+
+[tool.poe.tasks.cli]
+cmd = "python cli.py"
+help = "💻 Run the bot in Command-Line Interface mode"
+deps = ["_env_check"]
+
+# --- Aggregate Tasks ---
+[tool.poe.tasks.quality]
+sequence = ["lint", "mypy"]
+help = "🏅 Run all code quality checks"
+
+[tool.poe.tasks.check]
+sequence = ["quality", "test"]
+help = "✅ Run all checks (quality + tests)"

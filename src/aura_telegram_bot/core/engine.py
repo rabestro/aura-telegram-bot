@@ -59,7 +59,7 @@ class AuraEngine:
 
         try:
             response = await self._model.generate_content_async(prompt)
-            return response.text
+            return str(response.text)
         except Exception as e:
             logger.error(f"An error occurred with the Gemini API: {e}")
             return (
