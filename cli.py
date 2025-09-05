@@ -34,8 +34,8 @@ async def main() -> None:
 
     while True:
         try:
-            user_input = input("You: ")
-            if user_input.lower() in ["exit", "quit"]:
+            user_input = await asyncio.to_thread(input, "You: ")
+            if user_input.strip().lower() in ("exit", "quit"):
                 print("Aura: Goodbye!")
                 break
 
