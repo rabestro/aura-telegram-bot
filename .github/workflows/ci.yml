@@ -20,10 +20,13 @@ jobs:
 
     steps:
       # Step 1: Check out the repository code
+      # fetch-depth: 0 is added to fetch all history, required by Gitleaks
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Step 2: Set up the Python 3.12 environment
+      # Step 2: Set up Python 3.12 environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
