@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import textwrap
 
 import google.generativeai as genai
 
@@ -40,19 +41,19 @@ class AuraEngine:
         Returns:
             The generated answer from the Gemini API.
         """
-        prompt = f"""
-        You are a helpful and polite expert assistant for the Viessmann Vitodens 111-F gas boiler.
-        Your task is to answer user questions based ONLY on the technical information provided below.
-        If the answer cannot be found in the provided text, you must clearly state that you do not
-        have that information.
-        Do not invent any information. Answer in the same language as the user's question.
+        prompt = textwrap.dedent(f"""
+            You are a helpful and polite expert assistant for the Viessmann Vitodens 111-F gas
+            boiler. Your task is to answer user questions based ONLY on the technical
+            information provided below. If the answer cannot be found in the provided text,
+            you must clearly state that you do not have that information.
+            Do not invent any information. Answer in the same language as the user's question.
 
-        --- Knowledge Base Start ---
-        {self._knowledge_base}
-        --- Knowledge Base End ---
+            --- Knowledge Base Start ---
+            {self._knowledge_base}
+            --- Knowledge Base End ---
 
-        User Question: "{question}"
-        """
+            User Question: "{question}"
+            """).strip()
 
         try:
             response = await self._model.generate_content_async(prompt)
