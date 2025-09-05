@@ -7,12 +7,16 @@ name: Continuous Integration
 # Trigger the workflow on pull requests targeting the main branch
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   quality-and-test:
     name: Code Quality and Tests
     runs-on: ubuntu-latest
+    # Grant permissions for Gitleaks to read pull request contents
+    permissions:
+      contents: read
+      pull-requests: read
 
     steps:
       # Step 1: Check out the repository code
@@ -38,6 +42,8 @@ jobs:
       - name: Run Gitleaks security scan
         uses: gitleaks/gitleaks-action@v2
         env:
+          # Pass the GitHub token to allow scanning of pull requests
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # This tells gitleaks to fail the build if secrets are found
           GITLEAKS_ENABLE_EXIT_ON_FAIL: "true"
 
