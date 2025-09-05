@@ -29,7 +29,7 @@ COPY --from=python-base /usr/local/bin /usr/local/bin
 
 # Copy the application source code and knowledge base
 COPY src/aura_telegram_bot ./aura_telegram_bot
-COPY boiler_manual.txt .
+COPY knowledge_base.txt .
 
 # Command to run the bot when the container starts
 CMD ["python", "-m", "aura_telegram_bot.main"]

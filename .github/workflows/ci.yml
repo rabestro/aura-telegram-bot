@@ -1,0 +1,52 @@
+# This GitHub Actions workflow defines our Continuous Integration (CI) pipeline.
+# It runs automatically on every pull request to the 'main' branch to ensure
+# code quality, security, and correctness before merging.
+
+name: Continuous Integration
+
+# Trigger the workflow on pull requests targeting the main branch
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  quality-and-test:
+    name: Code Quality and Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the Python 3.12 environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Step 3: Install uv (our package manager)
+      - name: Install uv
+        run: pip install uv
+
+      # Step 4: Install all project dependencies, including dev tools
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      # Step 5: Run security scan for leaked secrets
+      # This is a critical check to prevent accidental exposure of credentials.
+      - name: Run Gitleaks security scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          # This tells gitleaks to fail the build if secrets are found
+          GITLEAKS_ENABLE_EXIT_ON_FAIL: "true"
+
+      # Step 6: Run all code quality checks (linter, type checker)
+      # We reuse our `poe` task for consistency with local development.
+      - name: Run code quality checks
+        run: poe quality
+
+      # Step 7: Run the unit test suite
+      # We reuse our `poe` task to run pytest.
+      - name: Run tests
+        run: poe test
