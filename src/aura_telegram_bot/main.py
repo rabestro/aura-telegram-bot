@@ -69,10 +69,10 @@ def main() -> None:
     telegram_token = os.getenv("TELEGRAM_TOKEN")
     gemini_api_key = os.getenv("GEMINI_API_KEY")
 
-    if not telegram_token:
+    if telegram_token is None:
         msg = "TELEGRAM_TOKEN environment variable not set. Please create a .env file."
         raise ValueError(msg)
-    if not gemini_api_key:
+    if gemini_api_key is None:
         msg = "GEMINI_API_KEY environment variable not set. Please create a .env file."
         raise ValueError(msg)
 
