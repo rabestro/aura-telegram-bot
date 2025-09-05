@@ -172,6 +172,11 @@ cmd = "python -m aura_telegram_bot.main"
 help = "▶️  Run the Telegram bot for local development"
 deps = ["_env_check"] # This ensures _env_check runs BEFORE the main command
 
+[tool.poe.tasks.cli]
+cmd = "python cli.py"
+help = "💻 Run the bot in Command-Line Interface mode"
+deps = ["_env_check"]
+
 # --- Aggregate Tasks ---
 [tool.poe.tasks.quality]
 sequence = ["lint", "mypy"]
