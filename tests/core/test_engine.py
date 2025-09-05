@@ -1,3 +1,5 @@
+"""Unit tests for the AuraEngine class."""
+
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, patch

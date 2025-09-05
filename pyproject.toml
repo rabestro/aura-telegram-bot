@@ -117,6 +117,11 @@ line-ending = "lf"
 mypy_path = "src"
 strict = true
 
+# Ignore missing type stubs for the google-generativeai library
+[[tool.mypy.overrides]]
+module = "google.generativeai.*"
+ignore_missing_imports = true
+
 # --- Pytest (Testing Framework) ---
 [tool.pytest.ini_options]
 minversion = "7.0"
@@ -160,6 +165,10 @@ help = "✨ Automatically fix linter errors"
 cmd = "mypy src/"
 help = "🧐 Check static types with mypy"
 
+[tool.poe.tasks.ty]
+cmd = "uvx ty check"
+help = "🧐 Check static types with ty"
+
 # --- Testing ---
 [tool.poe.tasks.test]
 cmd = "pytest"
@@ -178,7 +187,7 @@ deps = ["_env_check"]
 
 # --- Aggregate Tasks ---
 [tool.poe.tasks.quality]
-sequence = ["lint", "mypy"]
+sequence = ["lint", "ty"]
 help = "🏅 Run all code quality checks"
 
 [tool.poe.tasks.check]
