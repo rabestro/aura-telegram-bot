@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+import logging
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from aura_telegram_bot.core.engine import AuraEngine
 
@@ -12,38 +15,76 @@ from aura_telegram_bot.core.engine import AuraEngine
 pytestmark = pytest.mark.asyncio
 
 
-@patch("aura_telegram_bot.core.engine.genai.GenerativeModel", autospec=True)
-async def test_get_response_uses_gemini_api(mock_generative_model: AsyncMock) -> None:
+# We patch the entire module to have full control over all its functions
+@patch("aura_telegram_bot.core.engine.genai", autospec=True)
+async def test_get_response_uses_gemini_api_successfully(mock_genai: MagicMock) -> None:
     """Verify that the engine formats the prompt and calls the Gemini API correctly."""
-    # Arrange: Set up the test conditions
-    # 1. Configure the mock to simulate the Gemini API's response object.
-    mock_response_object = AsyncMock()
-    mock_response_object.text = "Mocked Gemini Response"
-
-    # 2. Make the mock 'generate_content_async' method return our fake response object.
-    #    The `return_value` of the model instance is what we configure.
-    mock_model_instance = mock_generative_model.return_value
-    mock_model_instance.generate_content_async.return_value = mock_response_object
-
-    # 3. Create an instance of our engine with test data.
-    engine = AuraEngine(
-        gemini_api_key="fake-api-key", knowledge_base="Test knowledge base."
+    # Arrange to Configure the mock for a successful API response
+    mock_genai.GenerativeModel.return_value.generate_content_async.return_value = SimpleNamespace(
+        text="Mocked Gemini Response",
     )
-    user_question = "What is the test question?"
 
-    # Act: Call the method we are testing
+    # Act
+    engine = AuraEngine(gemini_api_key="fake-api-key", knowledge_base="Test knowledge base.")
+    user_question = "What is the test question?"
     actual_response = await engine.get_response(user_question)
 
-    # Assert: Check that the results are what we expect
-    # 1. Check that the method returned the text from our mock response.
-    assert actual_response == "Mocked Gemini Response"
+    # Assert
+    # 1. Verify initialization
+    mock_genai.configure.assert_called_once_with(api_key="fake-api-key")
+    mock_genai.GenerativeModel.assert_called_once_with("gemini-1.5-flash")
 
-    # 2. Verify that the Gemini API was called exactly once.
-    mock_model_instance.generate_content_async.assert_called_once()
-
-    # 3. (Optional but good practice) Check that the prompt sent to the API was correct.
-    call_args, _ = mock_model_instance.generate_content_async.call_args
+    # 2. Verify API call
+    mock_genai.GenerativeModel.return_value.generate_content_async.assert_called_once()
+    call_args, _ = mock_genai.GenerativeModel.return_value.generate_content_async.call_args
     sent_prompt = call_args[0]
     assert "Test knowledge base." in sent_prompt
     assert "What is the test question?" in sent_prompt
     assert "You are a helpful and polite expert assistant" in sent_prompt
+
+    # 3. Verify final response
+    assert actual_response == "Mocked Gemini Response"
+
+
+@patch("aura_telegram_bot.core.engine.genai", autospec=True)
+async def test_get_response_handles_api_exception(
+    mock_genai: MagicMock, caplog: LogCaptureFixture
+) -> None:
+    """Verify that the engine gracefully handles exceptions from the Gemini API."""
+    # Arrange to Configure the mock to raise an exception when called
+    error_message = "API connection failed"
+    mock_genai.GenerativeModel.return_value.generate_content_async.side_effect = Exception(
+        error_message
+    )
+
+    # Set up logging capture for this specific test
+    with caplog.at_level(logging.ERROR, logger="aura_telegram_bot.core.engine"):
+        # Act
+        engine = AuraEngine(gemini_api_key="fake-api-key", knowledge_base="Test knowledge base.")
+        actual_response = await engine.get_response("any question")
+
+        # Assert
+        # 1. Check if the user received a graceful error message
+        assert "Sorry, I encountered an error" in actual_response
+
+        # 2. Check if the error was logged correctly for developers
+        assert len(caplog.records) == 1
+        assert "An error occurred with the Gemini API" in caplog.text
+        assert error_message in caplog.text
+
+
+@patch("aura_telegram_bot.core.engine.genai", autospec=True)
+async def test_get_response_handles_malformed_api_response(mock_genai: MagicMock) -> None:
+    """Verify that the engine handles API responses that lack the 'text' attribute."""
+    # Arrange to Simulate a response object without the 'text' attribute
+    malformed_response = SimpleNamespace(parts=[])  # No .text attribute
+    mock_genai.GenerativeModel.return_value.generate_content_async.return_value = (
+        malformed_response
+    )
+
+    # Act
+    engine = AuraEngine(gemini_api_key="fake-api-key", knowledge_base="Test knowledge base.")
+    actual_response = await engine.get_response("any question")
+
+    # Assert
+    assert "Sorry, I couldn't generate a response" in actual_response
