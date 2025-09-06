@@ -29,6 +29,7 @@ dependencies = [
   "google-generativeai", # For integration with the Gemini AI API
   "python-dotenv",       # For loading secrets (tokens) from a .env file
   "pydantic-settings",   # For robust settings management
+  "httpx",               # Asynchronous HTTP client for API integrations
 ]
 
 [project.urls]
