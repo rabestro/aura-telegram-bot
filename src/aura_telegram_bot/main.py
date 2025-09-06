@@ -7,7 +7,7 @@ import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-from aura_telegram_bot.config import settings
+from aura_telegram_bot.config import get_settings
 from aura_telegram_bot.core.engine import AuraEngine
 
 # --- Setup logging ---
@@ -64,6 +64,7 @@ def main() -> None:
     logger.info("Starting bot...")
 
     # --- Initialize Telegram Bot using validated settings ---
+    settings = get_settings()
     application = Application.builder().token(settings.telegram_token).build()
 
     # --- Initialize Engine and add it to the bot's context ---

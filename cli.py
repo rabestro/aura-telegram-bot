@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from aura_telegram_bot.config import settings
+from aura_telegram_bot.config import get_settings
 from aura_telegram_bot.core.engine import AuraEngine
 
 # --- Setup logging ---
@@ -18,6 +18,7 @@ async def main() -> None:
     # Settings are loaded and validated upon import.
     # We can directly use the `settings` object.
     print("Initializing AuraEngine for CLI...")
+    settings = get_settings()
     knowledge_base = settings.load_knowledge_base()
     engine = AuraEngine(gemini_api_key=settings.gemini_api_key, knowledge_base=knowledge_base)
     print("Engine ready. Type 'exit' or 'quit' to end the session.")

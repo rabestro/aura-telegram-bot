@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,8 +51,16 @@ class Settings(BaseSettings):
             return "No specific boiler information is available."
 
 
-# Create a single, importable instance of the settings.
-# When this line is executed, Pydantic immediately loads and validates
-# the environment variables. If a required variable is missing, the app
-# will fail fast with a clear error message.
-settings = Settings()  # ty: ignore[missing-argument]
+@lru_cache
+def get_settings() -> Settings:
+    """Return a cached instance of the Settings object.
+
+    This function uses lru_cache to ensure that the Settings object is
+    created only once (the first time it's called), and subsequent calls
+    will return the same cached instance. This implements a lazy-loading
+    singleton pattern.
+
+    Returns:
+        An instance of the Settings class.
+    """
+    return Settings()  # ty: ignore[missing-argument]
