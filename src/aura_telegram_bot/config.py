@@ -54,4 +54,4 @@ class Settings(BaseSettings):
 # When this line is executed, Pydantic immediately loads and validates
 # the environment variables. If a required variable is missing, the app
 # will fail fast with a clear error message.
-settings = Settings()
+settings = Settings()  # ty: ignore[missing-argument]
