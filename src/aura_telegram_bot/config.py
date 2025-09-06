@@ -6,7 +6,7 @@ import logging
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # --- Setup logging ---
@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     # --- Secrets (will be loaded from the .env file) ---
     telegram_token: str
     gemini_api_key: str
+    home_assistant_token: str
+
+    # --- URLs ---
+    home_assistant_url: HttpUrl
 
     # --- Security ---
     # A list of authorized Telegram user IDs. Pydantic will automatically
