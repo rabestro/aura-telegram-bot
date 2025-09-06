@@ -40,32 +40,32 @@ Aura Telegram Bot is a Python-based, AI-powered chatbot designed to act as a per
 
 1. **Clone the repository:**
     
-    ```
-    git clone [https://github.com/rabestro/aura-telegram-bot.git](https://github.com/rabestro/aura-telegram-bot.git)
+    ```shell
+    git clone https://github.com/rabestro/aura-telegram-bot.git
     cd aura-telegram-bot
     ```
     
 2. **Configure your environment:** This project uses a `.env` file for managing secrets and configuration.
     
-    ```
+    ```shell
     # Create your own .env file from the example
     cp .env.example .env
     ```
     
     Now, edit the `.env` file and fill in your credentials. It is **critical** to set the `ALLOWED_TELEGRAM_USER_IDS`.
     
-    ```
+    ```dotenv
     # .env
     TELEGRAM_TOKEN="YOUR_TELEGRAM_BOT_TOKEN_HERE"
     GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
-    ALLOWED_TELEGRAM_USER_IDS="123456789" # <-- Replace with your User ID
+    ALLOWED_TELEGRAM_USER_IDS=[123456789] # <-- Replace with your User ID
     ```
     
-    To allow multiple users, separate their IDs with a comma: `123456789,987654321`.
+    To allow multiple users, separate their IDs with a comma: `[123456789,987654321]`.
     
 3. **Build and run the Docker container:**
     
-    ```
+    ```shell
     docker build -t aura-bot:latest .
     docker run -d --name aura-telegram-bot --restart always --env-file .env aura-bot:latest
     ```
