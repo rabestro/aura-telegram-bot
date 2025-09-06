@@ -12,54 +12,72 @@ from aura_telegram_bot.auth import restricted
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture
-def mock_update() -> MagicMock:
-    """Fixture to create a mock Update object."""
-    update = MagicMock()
-    update.effective_user.id = 12345  # Authorized user ID
-    update.effective_user.first_name = "Jegors"
-    return update
-
-
-@pytest.fixture
-def mock_context() -> MagicMock:
-    """Fixture to create a mock Context object."""
-    return MagicMock()
-
-
 @patch("aura_telegram_bot.auth.get_settings")
 async def test_restricted_allows_authorized_user(
     mock_get_settings: MagicMock,
-    mock_update: MagicMock,
-    mock_context: MagicMock,
 ) -> None:
     """Verify that the decorator allows a user with an ID in the whitelist."""
     # Arrange
-    mock_get_settings.return_value.allowed_telegram_user_ids = [12345, 67890]
-    original_handler = AsyncMock()
+    mock_get_settings.return_value.allowed_telegram_user_ids = [12345]
+
+    update = MagicMock()
+    update.effective_user.id = 12345
+    update.effective_user.first_name = "Jegors"
+    context = MagicMock()
+
+    original_handler = AsyncMock(return_value="Success")
     decorated_handler = restricted(original_handler)
 
     # Act
-    await decorated_handler(mock_update, mock_context)
+    result = await decorated_handler(update, context)
 
     # Assert
-    original_handler.assert_called_once_with(mock_update, mock_context)
+    assert result == "Success"
+    original_handler.assert_awaited_once_with(update, context)
 
 
 @patch("aura_telegram_bot.auth.get_settings")
 async def test_restricted_blocks_unauthorized_user(
     mock_get_settings: MagicMock,
-    mock_update: MagicMock,
-    mock_context: MagicMock,
 ) -> None:
     """Verify that the decorator blocks a user with an ID not in the whitelist."""
     # Arrange
-    mock_get_settings.return_value.allowed_telegram_user_ids = [99999, 88888]
+    mock_get_settings.return_value.allowed_telegram_user_ids = [12345]
+
+    update = MagicMock()
+    update.effective_user.id = 99999  # Unauthorized ID
+    update.effective_user.first_name = "Stranger"
+    context = MagicMock()
+
     original_handler = AsyncMock()
     decorated_handler = restricted(original_handler)
 
     # Act
-    await decorated_handler(mock_update, mock_context)
+    result = await decorated_handler(update, context)
 
     # Assert
-    original_handler.assert_not_called()
+    assert result is None
+    original_handler.assert_not_awaited()
+
+
+@patch("aura_telegram_bot.auth.get_settings")
+async def test_restricted_ignores_update_without_effective_user(
+    mock_get_settings: MagicMock,
+) -> None:
+    """Verify that the decorator handles updates without an effective_user."""
+    # Arrange: This simulates a system-level update, like a channel post.
+    mock_get_settings.return_value.allowed_telegram_user_ids = [12345]
+
+    update = MagicMock()
+    update.effective_user = None  # No user associated with the update
+    context = MagicMock()
+
+    original_handler = AsyncMock()
+    decorated_handler = restricted(original_handler)
+
+    # Act
+    result = await decorated_handler(update, context)
+
+    # Assert
+    assert result is None
+    original_handler.assert_not_awaited()
