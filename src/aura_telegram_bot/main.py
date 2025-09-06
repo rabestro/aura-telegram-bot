@@ -75,7 +75,7 @@ def main() -> None:
     # --- Initialize Engine and add it to the bot's context ---
     knowledge_base = settings.load_knowledge_base()
     engine = AuraEngine(
-        gemini_api_key=settings.gemini_api_key.get_secret_value(),
+        gemini_api_key=settings.gemini_api_key,
         knowledge_base=knowledge_base,
     )
     application.bot_data["engine"] = engine
