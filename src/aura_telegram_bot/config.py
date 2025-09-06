@@ -45,7 +45,7 @@ class Settings(BaseSettings):
             return self.knowledge_base_path.read_text(encoding="utf-8")
         except FileNotFoundError:
             logger.error(
-                f"'{self.knowledge_base_path}' not found. Bot will lack specific context."
+                f"'{self.knowledge_base_path}' not found. Bot will lack specific context.",
             )
             return "No specific boiler information is available."
 
@@ -53,4 +53,4 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Return a cached instance of the Settings object."""
-    return Settings()
+    return Settings()  # ty: ignore[missing-argument]
