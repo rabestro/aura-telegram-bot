@@ -1,0 +1,27 @@
+# docker-compose.example.yml
+# This is an example file for deploying the Aura bot alongside other services.
+# Copy this to 'docker-compose.yml' and adapt it to your needs.
+
+services:
+  aura-bot:
+    # Use the image you built and pushed with your CD pipeline, or build locally.
+    # To build locally, uncomment the 'build' section.
+    image: rabestro/aura-telegram-bot:latest
+    # build: .
+    container_name: aura-telegram-bot
+    restart: unless-stopped
+    # Use a dedicated .env file for the bot's secrets.
+    env_file:
+      - aura-bot.env
+    # This links our local knowledge_base.txt to the one inside the container.
+    # It allows us to update the knowledge base without rebuilding the image.
+    volumes:
+      - ./knowledge_base.txt:/app/knowledge_base.txt:ro # 'ro' for read-only
+    networks:
+      - auranet-services
+
+networks:
+  # Defines a custom network for our services to communicate on.
+  # This assumes other services (like Home Assistant) might be on the same network.
+  auranet-services:
+    driver: bridge
