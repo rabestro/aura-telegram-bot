@@ -51,7 +51,7 @@ async def test_get_entity_state_success(client_instance: HomeAssistantClient) ->
     assert actual_state == expected_state
     sent_headers = request.calls.last.request.headers
     assert sent_headers["authorization"] == f"Bearer {TEST_TOKEN}"
-    assert sent_headers["content-type"] == "application/json"
+    assert sent_headers["accept"] == "application/json"
 
 
 @respx.mock
@@ -98,3 +98,34 @@ async def test_client_used_without_context_manager(
         match="HomeAssistantClient must be used with 'async with'.",
     ):
         await client_instance.get_entity_state(TEST_ENTITY_ID)
+
+
+async def test_reuses_client_session(
+    monkeypatch: pytest.MonkeyPatch,
+    client_instance: HomeAssistantClient,
+) -> None:
+    """Verify that the httpx.AsyncClient is created only once per context."""
+    # Arrange
+    created_count = 0
+
+    # Spy on the httpx.AsyncClient constructor
+    original_init = httpx.AsyncClient.__init__
+
+    def spy_init(self: httpx.AsyncClient, *args: Any, **kwargs: Any) -> None:
+        nonlocal created_count
+        created_count += 1
+        original_init(self, *args, **kwargs)
+
+    monkeypatch.setattr(httpx.AsyncClient, "__init__", spy_init)
+
+    # Act
+    with respx.mock:
+        respx.get(f"{TEST_URL}/api/states/{TEST_ENTITY_ID}").mock(
+            return_value=Response(200, json={}),  # Fix: Provide a valid JSON body
+        )
+        async with client_instance as client:
+            await client.get_entity_state(TEST_ENTITY_ID)
+            await client.get_entity_state(TEST_ENTITY_ID)
+
+    # Assert
+    assert created_count == 1, "AsyncClient should only be created once."
