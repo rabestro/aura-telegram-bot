@@ -11,7 +11,7 @@ from httpx import Response
 
 from aura_telegram_bot.integrations.home_assistant import (
     ApiError,
-    ConnectionError,
+    HAConnectionError,
     HomeAssistantClient,
 )
 
@@ -73,7 +73,7 @@ async def test_get_entity_state_api_error(client: HomeAssistantClient) -> None:
 
 @respx.mock
 async def test_get_entity_state_connection_error(client: HomeAssistantClient) -> None:
-    """Verify that ConnectionError is raised on network issues."""
+    """Verify that HAConnectionError is raised on network issues."""
     # Arrange
     # Mock a network-level error, like a timeout or DNS failure
     request = respx.get(f"{TEST_URL}/api/states/{TEST_ENTITY_ID}").mock(
@@ -81,7 +81,7 @@ async def test_get_entity_state_connection_error(client: HomeAssistantClient) ->
     )
 
     # Act & Assert
-    with pytest.raises(ConnectionError, match="Cannot connect to Home Assistant"):
+    with pytest.raises(HAConnectionError, match="Cannot connect to Home Assistant"):
         await client.get_entity_state(TEST_ENTITY_ID)
 
     assert request.called

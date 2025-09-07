@@ -20,7 +20,7 @@ class ApiError(HomeAssistantError):
     """Raised when the API returns a non-200 status code."""
 
 
-class ConnectionError(HomeAssistantError):
+class HAConnectionError(HomeAssistantError):
     """Raised when the client cannot connect to Home Assistant."""
 
 
@@ -38,6 +38,7 @@ class HomeAssistantClient:
         self._headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
+            "Accept": "application/json",
         }
 
     async def get_entity_state(self, entity_id: str) -> dict[str, Any]:
@@ -50,7 +51,7 @@ class HomeAssistantClient:
             A dictionary representing the entity's state.
 
         Raises:
-            ConnectionError: If there's a network issue connecting to Home Assistant.
+            HAConnectionError: If there's a network issue connecting to Home Assistant.
             ApiError: If Home Assistant returns an error response.
         """
         api_path = f"api/states/{entity_id}"
@@ -64,11 +65,12 @@ class HomeAssistantClient:
                 response.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
                 return response.json()
             except httpx.RequestError as e:
-                logger.error(f"Failed to connect to Home Assistant at {url}: {e}")
-                raise ConnectionError(f"Cannot connect to Home Assistant: {e}") from e
+                logger.exception("Failed to connect to Home Assistant at %s", url)
+                raise HAConnectionError(f"Cannot connect to Home Assistant: {e}") from e
             except httpx.HTTPStatusError as e:
-                logger.error(
-                    f"Received non-200 response from Home Assistant: {e.response.status_code}",
+                logger.exception(
+                    "Received non-200 response from Home Assistant: %s",
+                    e.response.status_code,
                 )
                 raise ApiError(
                     f"Home Assistant API returned status {e.response.status_code}",
