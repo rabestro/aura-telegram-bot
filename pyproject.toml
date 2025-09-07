@@ -43,10 +43,10 @@ Repository = "https://github.com/rabestro/aura-telegram-bot.git"
 [project.optional-dependencies]
 dev = [
   "ruff", # Code linter and formatter
-  "mypy", # Static type checker
   "pytest", # Testing framework
   "pytest-asyncio", # For testing asynchronous code
   "poethepoet", # Task runner
+  "respx>=0.21", # HTTPX mocking for tests
 ]
 
 # ==============================================================================
@@ -113,16 +113,6 @@ required-imports = ["from __future__ import annotations"]
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
-
-# --- MyPy (Type Checker) ---
-[tool.mypy]
-mypy_path = "src"
-strict = true
-
-# Ignore missing type stubs for the google-generativeai library
-[[tool.mypy.overrides]]
-module = "google.generativeai.*"
-ignore_missing_imports = true
 
 # --- Pytest (Testing Framework) ---
 [tool.pytest.ini_options]
