@@ -52,14 +52,14 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "google-generativeai" },
-    { name = "httpx" },
+    { name = "httpx", specifier = ">=0.27,<1" },
     { name = "poethepoet", marker = "extra == 'dev'" },
     { name = "pydantic-settings" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
     { name = "python-telegram-bot" },
-    { name = "respx", marker = "extra == 'dev'", specifier = ">=0.21" },
+    { name = "respx", marker = "extra == 'dev'", specifier = ">=0.22,<0.23" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
