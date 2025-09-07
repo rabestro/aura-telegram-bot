@@ -57,7 +57,8 @@ class HomeAssistantClient:
         url = urljoin(self._base_url, api_path)
         logger.info(f"Requesting entity state from: {url}")
 
-        async with httpx.AsyncClient() as client:
+        DEFAULT_TIMEOUT = httpx.Timeout(10.0)
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
             try:
                 response = await client.get(url, headers=self._headers)
                 response.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
