@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from types import TracebackType
 from typing import Any
 from urllib.parse import urljoin
 
@@ -10,6 +11,8 @@ import httpx
 
 # --- Setup logging ---
 logger = logging.getLogger(__name__)
+
+DEFAULT_TIMEOUT = httpx.Timeout(10.0)
 
 
 class HomeAssistantError(Exception):
@@ -40,6 +43,23 @@ class HomeAssistantClient:
             "Content-Type": "application/json",
             "Accept": "application/json",
         }
+        self._client: httpx.AsyncClient | None = None
+
+    async def __aenter__(self) -> HomeAssistantClient:
+        """Enter the async context manager, initializing the client."""
+        self._client = httpx.AsyncClient(timeout=DEFAULT_TIMEOUT)
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Exit the async context manager, closing the client."""
+        if self._client:
+            await self._client.aclose()
+        self._client = None
 
     async def get_entity_state(self, entity_id: str) -> dict[str, Any]:
         """Fetches the state of a specific entity from Home Assistant.
@@ -53,12 +73,15 @@ class HomeAssistantClient:
         Raises:
             HAConnectionError: If there's a network issue connecting to Home Assistant.
             ApiError: If Home Assistant returns an error response.
+            TypeError: If the client is used outside of an `async with` block.
         """
+        if not self._client:
+            raise TypeError("HomeAssistantClient must be used with 'async with'.")
+
         api_path = f"api/states/{entity_id}"
         url = urljoin(self._base_url, api_path)
         logger.info(f"Requesting entity state from: {url}")
 
-        DEFAULT_TIMEOUT = httpx.Timeout(10.0)
         async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
             try:
                 response = await client.get(url, headers=self._headers)
