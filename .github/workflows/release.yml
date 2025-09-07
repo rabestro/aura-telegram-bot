@@ -1,0 +1,101 @@
+# This GitHub Actions workflow automates the release process for the Aura Telegram Bot.
+# It triggers on a git tag push (e.g., v0.1.0), runs checks, builds a multi-platform
+# Docker image, pushes it to Docker Hub, and creates a corresponding GitHub Release.
+
+name: Release
+
+# 1. TRIGGER: This workflow runs only when a new tag is pushed.
+# The tag must follow a semantic versioning pattern, like 'v0.1.0'.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  # ============================================================================
+  # JOB: release
+  # This single job handles all steps of the release process.
+  # ============================================================================
+  release:
+    name: Build, Push, and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create the GitHub Release
+
+    steps:
+      # ------------------------------------------------------------------------
+      # STEP 1: Check out the repository code
+      # ------------------------------------------------------------------------
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for changelog generation
+
+      # ------------------------------------------------------------------------
+      # STEP 2: Set up Docker Buildx for multi-platform builds
+      # This is essential for building images that can run on both standard
+      # servers (amd64) and Raspberry Pi (arm64).
+      # ------------------------------------------------------------------------
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ------------------------------------------------------------------------
+      # STEP 3: Log in to Docker Hub
+      # Securely logs in using secrets stored in the GitHub repository settings.
+      # Never hardcode credentials in your workflow files.
+      # ------------------------------------------------------------------------
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ------------------------------------------------------------------------
+      # STEP 4: Extract metadata for Docker image
+      # This action automatically determines the image name and tags based on
+      # the Git tag that triggered the workflow. For a 'v1.2.3' tag, it will
+      # generate tags like '1.2.3', '1.2', '1', and 'latest'.
+      # ------------------------------------------------------------------------
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: rabestro/aura-telegram-bot
+
+      # ------------------------------------------------------------------------
+      # STEP 5: Run Code Quality Checks
+      # Before building, ensure the code is clean and all tests pass. If this
+      # step fails, the workflow will stop, preventing a bad release.
+      # ------------------------------------------------------------------------
+      - name: Install dependencies and run checks
+        run: |
+          pip install uv
+          uv sync --all-extras
+          uvx poe check
+
+      # ------------------------------------------------------------------------
+      # STEP 6: Build and push the Docker image
+      # This step builds the multi-platform image and pushes it to Docker Hub
+      # with all the tags generated in the metadata step.
+      # ------------------------------------------------------------------------
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # ------------------------------------------------------------------------
+      # STEP 7: Create GitHub Release
+      # This action creates a beautiful release page on GitHub, complete with
+      # a title, the tag name, and an automatically generated changelog.
+      # ------------------------------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true # Automatically create a changelog
