@@ -5,14 +5,19 @@ from __future__ import annotations
 import logging
 from types import TracebackType
 from typing import Any
-from urllib.parse import urljoin
 
 import httpx
 
 # --- Setup logging ---
 logger = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = httpx.Timeout(10.0)
+# A more robust timeout configuration with per-phase values.
+DEFAULT_TIMEOUT = httpx.Timeout(
+    connect=5.0,
+    read=10.0,
+    write=10.0,
+    pool=5.0,
+)
 
 
 class HomeAssistantError(Exception):
@@ -47,7 +52,11 @@ class HomeAssistantClient:
 
     async def __aenter__(self) -> HomeAssistantClient:
         """Enter the async context manager, initializing the client."""
-        self._client = httpx.AsyncClient(timeout=DEFAULT_TIMEOUT)
+        self._client = httpx.AsyncClient(
+            base_url=self._base_url,
+            headers=self._headers,
+            timeout=DEFAULT_TIMEOUT,
+        )
         return self
 
     async def __aexit__(
@@ -57,9 +66,11 @@ class HomeAssistantClient:
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager, closing the client."""
-        if self._client:
-            await self._client.aclose()
-        self._client = None
+        try:
+            if self._client:
+                await self._client.aclose()
+        finally:
+            self._client = None
 
     async def get_entity_state(self, entity_id: str) -> dict[str, Any]:
         """Fetches the state of a specific entity from Home Assistant.
@@ -79,22 +90,20 @@ class HomeAssistantClient:
             raise TypeError("HomeAssistantClient must be used with 'async with'.")
 
         api_path = f"api/states/{entity_id}"
-        url = urljoin(self._base_url, api_path)
-        logger.info(f"Requesting entity state from: {url}")
+        logger.info(f"Requesting entity state from: {api_path}")
 
-        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT) as client:
-            try:
-                response = await client.get(url, headers=self._headers)
-                response.raise_for_status()  # Raises HTTPStatusError for 4xx/5xx responses
-                return response.json()
-            except httpx.RequestError as e:
-                logger.exception("Failed to connect to Home Assistant at %s", url)
-                raise HAConnectionError(f"Cannot connect to Home Assistant: {e}") from e
-            except httpx.HTTPStatusError as e:
-                logger.exception(
-                    "Received non-200 response from Home Assistant: %s",
-                    e.response.status_code,
-                )
-                raise ApiError(
-                    f"Home Assistant API returned status {e.response.status_code}",
-                ) from e
+        try:
+            response = await self._client.get(api_path)
+            response.raise_for_status()
+            return response.json()
+        except httpx.RequestError as e:
+            logger.exception("Failed to connect to Home Assistant")
+            raise HAConnectionError(f"Cannot connect to Home Assistant: {e}") from e
+        except httpx.HTTPStatusError as e:
+            logger.exception(
+                "Received non-200 response from Home Assistant: %s",
+                e.response.status_code,
+            )
+            raise ApiError(
+                f"Home Assistant API returned status {e.response.status_code}",
+            ) from e
